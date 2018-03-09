@@ -1,99 +1,35 @@
-const fs= require("fs");
+const Sequelize = require('sequelize');
 
-const DB_FILENAME = "quizzes.json";
+const sequelize = new Sequelize("sqlite:quizzes.sqlite", {logging: false});
 
-
-let quizzes = [
-	{
-		question:"Capital de Italia",
-		answer: "Roma"
+sequelize.define('quiz', {
+	question: {
+		type: Sequelize.STRING,
+		unique: {msg: "Ya existe esta pregunta"},
+		validate: {notEmpty: {msg: "La pregunta no puede estar vacia"}}
 	},
-	{
-		question:"Capital de Francia",
-		answer: "Paris"
-	},
-	{
-		question:"Capital de España",
-		answer: "Madrid"
-	},
-	{
-		question:"Capital de Portugal",
-		answer:"Lisboa"
+	answer: {
+		type: Sequelize.STRING,
+		
+		validate: {notEmpty: {msg: "La respuesta no puede estar vacia"}}
 	}
-];
-// Carga las preguntas en el fichero
-
-const load = () => {
-	fs.readFile(DB_FILENAME,(err,data)=>{
-			if(err){
-				//La primera vez no existe el fichero
-				if(err.code === "ENOENT"){
-					save(); //Valores iniciales
-					return;
-				}
-				throw err;
-			}
-
-			let json = JSON.parse(data);
-			if(json){
-				quizzes=json;
-			}
-	});
-};
-
-const save = () => {
-	fs.writeFile(DB_FILENAME,
-		JSON.stringify(quizzes),
-		err => {
-			if (err) throw err;
-		});
-};
-
-
-// Cuenta el numero de quizzes
-exports.count = () => quizzes.length;
-// Añade un quiz
-exports.add = (question,answer) => {
-
-	quizzes.push({
-		question: (question || "").trim(),
-		answer: (answer || "").trim()
-	});
-	save();
-};
-// Actualiza un quiz
-exports.update =(id,question,answer) => {
-
-	const quiz = quizzes[id];
-	if(typeof quiz === "undefined"){
-		throw new Error(`El valor del parametro id no es valido`);
+});
+sequelize.sync()
+.then(() => sequelize.models.quiz.count())
+.then(count => {
+	if(!count){
+		return sequelize.models.quiz.bulkCreate([
+			{question: "Capital de Italia", answer: "Roma"},
+			{question: "Capital de Francia", answer: "Paris"},
+			{question: "Capital de España", answer: "Madrid"},
+			{question: "Capital de Portugal", answer: "Lisboa"}
+			
+			]);
+		
 	}
-	quizzes.splice(id,1,{
-		question: (question || "").trim(),
-		answer: (answer || "").trim()
-	});
-	save();
-};
-// Devuelve todos lps quizzes
-exports.getAll = () => JSON.parse(JSON.stringify(quizzes));
-// Devuelve el quiz con el id asignado
-exports.getByIndex = id => {
+})
+.catch(error => {
+	console.log(error);
+});
 
-	const quiz = quizzes[id];
-	if (typeof quiz == "undefined") {
-		throw new Error ('El valor del parametro id no es valido');
-	}
-	return JSON.parse(JSON.stringify(quiz));
-};
-// Elimina el quiz en la posicion dada
-exports.deleteByIndex = id => {
-	const quiz=quizzes[id];
-	if(typeof quiz === "undefined"){
-		throw new Error("El valor del parametro no es válido");
-	}
-	quizzes.splice(id,1);
-	save();
-};
-
-// Carga los quizzes en el fichero.
-load();
+module.exports = sequelize;
