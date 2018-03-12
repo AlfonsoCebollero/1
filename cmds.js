@@ -153,9 +153,8 @@ exports.testCmd = (rl,id) => {
 	  		.then(() => {
 
 	  		 	return playOne(); 
-	  		.catch(m => {
-
-	  			errorlog("Error:" + m); 
+	  		.catch(e => {
+	  			errorlog("Error:" + e);
 
 	  		})
 	  		.then(() => {
