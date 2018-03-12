@@ -70,56 +70,98 @@ exports.showCmd = (rl, id) => {
 
 
 exports.testCmd = (rl,id) => {
+	  validateId(id)
+	  .then(id => models.quiz.findById(id))
+	  .then(quiz => {
+	    if (!quiz){
+	      throw new Error(` No existe un quiz asociado al id=${id}.`)
+	    }
+	    return new Promise((resolve, reject) => {
+	
+	
+	    makeQuestion(rl, quiz.question)
+	    .then(answer => {
+	      if(answer.toLowerCase().trim() === quiz.answer.toLowerCase().trim()){
+	        log('Su respuesta es correcta');
+	        biglog('Correcta', 'green');
+	        resolve()
+	      }else{
+	        log('Su respuesta es incorrecta');
+	        biglog('Incorrecta', 'red');
+	        resolve()
+	      }
+	    })
+	  })
+	})
+	  .catch(error => {
+	    errorlog(error.message);
+	  })
+	  .then(() => {
+	    rl.prompt();
+	  });
+	
+	}
+	
+	
+	/*
+	 *Empieza el juego
+	 */
+	exports.playCmd = rl => {
+	
+	  		let score = 0; 
+	  		let restantes = []; 
+	
+	      for (i=0; i<models.quiz.count();i++){
+	        toBeResolved[i]=i;
+	      }
+	
+	  		const playOne = () => {
+	        return new Promise ((resolve, reject) => {
+	  				if(restantes.length === 0) {
+	            log(' ¡No hay más preguntas!','blue');
+	            log(' Fin del juego Aciertos: ');
+	  					
+	  					resolve();
+	  					return;
+	  				}
 
-	validateId(id)
-	.then(id => models.quiz.findById(id))
-	.then(quiz =>{
-		if(!quiz){
-			throw new Error(`No existe un quiz asociado al id= ${id}.`);
-		}
-		
-		})
+	  				let pos = Math.floor(Math.random()*restantes.length);
+	  				let quiz = restantes[pos];
+	  		    restantes.splice(pos, 1); 
+	
+	  		    makeQuestion(rl, quiz.question)
+	  		    .then(answer => {
+	            if(answer.toLowerCase().trim() === quiz.answer.toLowerCase().trim()){
+	              score+=1;
+	  				    log(` CORRECTO - Lleva ${score} aciertos`);
+	  				    resolve(playOne());
+	            }else{
+	              biglog('INCORRECTO', 'red');
+	              log(` Fin del juego. Aciertos: ${score} `);
+	  				   
+	  				    resolve();
+	  			    }
+	  		    })
+	  	     })
+	  	  }
+	  		models.quiz.findAll({raw: true}) 
+	  		.then(quizzes => {
+	  			restantes = quizzes;
+	      })
+	  		.then(() => {
 
+	  		 	return playOne(); 
+	  		.catch(m => {
 
+	  			errorlog("Error:" + m); 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-    if(typeof id === "undefined"){
-        errorlog(`Falta el parámetro id`);
-    } else {
-        try{
-            const quiz = model.getByIndex(id);
-           	rl.question(`${colorize(quiz.question + " ", 'red')}`, answer=>{ 
-            if(answer.toLowerCase().trim()===quiz.answer.toLowerCase().trim()){
-                log('Su respuesta es correcta');
-                biglog('Correcta','green');
-                rl.prompt();
-            }
-
-            else{
-            	log('Su respuesta es incorrecta');
-                biglog("Incorrecta",'red');
-                rl.prompt();
-            }
-        });
-        }catch(error){
-            errorlog(error.message);
-            
-        }
-    }
-    rl.prompt();
-};
+	  		})
+	  		.then(() => {
+	  			biglog(score, 'green');
+	  			
+	  			rl.prompt();
+	  		})
+	}
 
 const makeQuestion = (rl,text) => {
 
@@ -168,58 +210,6 @@ exports.deleteCmd = (rl, id) => {
 		});
 };
 
-exports.playCmd = rl => {
-
-	let score = 0; //variable que guarda la puntuación
-
-	let preguntasRestantes = []; //Array con índices de las preguntas que existen
-	
-	for (var i = 0; i < model.count(); i++){
-		//preguntasRestantes[i] = model.getByIndex[i];
-		preguntasRestantes[i] = i;
-	}	
-
-	const playOne = () => {
-
-		if(preguntasRestantes.length == 0){
-			log('¡No hay más preguntas!');
-			log(`Su puntuación final es... `);
-			biglog(`${score}`,'red');
-			log("¡¡¡ENHORABUENA!!!",'red');
-			rl.prompt();
-
-		} else {
-
-				let pos = Math.floor(Math.random() * preguntasRestantes.length);
-				let id = preguntasRestantes[pos];
-				let quiz = model.getByIndex(id);
-				preguntasRestantes.splice(pos, 1);
-
-
-				rl.question(colorize(quiz.question + "?\n",'yellow'), answer1 => {
-				if (String(answer1.trim().toLowerCase()) === String(quiz.answer.toLowerCase())){
-					score += 1;
-					log("....................................................................................................................................................................................");
-					log("\nCorrecto\n", 'green');
-					biglog("\nCorrecto\n", 'green');
-					if(score === 1) {log(`Lleva ${score} acierto`);	}
-					else {	log(`Lleva ${score} aciertos`);	}
-					playOne(); 
-				}
-				else{
-					log(`INCORRECTO`);
-					log(`Fin del juego, aciertos`);
-					biglog(score, 'blue');
-		
-					
-				} rl.prompt();
-			});
-		}
-	}
-
-	playOne();
-
-};
 
 exports.editCmd = (rl,id) => {
 	validateId(id)
