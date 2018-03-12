@@ -74,19 +74,18 @@ exports.testCmd = (rl,id) => {
 	  .then(id => models.quiz.findById(id))
 	  .then(quiz => {
 	    if (!quiz){
-	      throw new Error(` No existe un quiz asociado al id=${id}.`)
+	      throw new Error(` No existe un quiz asociado al id= ${id}.`)
 	    }
 	    return new Promise((resolve, reject) => {
-	
 	
 	    makeQuestion(rl, quiz.question)
 	    .then(answer => {
 	      if(answer.toLowerCase().trim() === quiz.answer.toLowerCase().trim()){
-	        log('Su respuesta es correcta');
+	        log('La respuesta es correcta');
 	        biglog('Correcta', 'green');
 	        resolve()
 	      }else{
-	        log('Su respuesta es incorrecta');
+	        log('La respuesta es incorrecta');
 	        biglog('Incorrecta', 'red');
 	        resolve()
 	      }
@@ -113,21 +112,24 @@ exports.testCmd = (rl,id) => {
 	
 	      for (i=0; i<models.quiz.count();i++){
 	        toBeResolved[i]=i;
+
 	      }
 	
 	  		const playOne = () => {
 	        return new Promise ((resolve, reject) => {
 	  				if(restantes.length === 0) {
+
 	            log(' ¡No hay más preguntas!','blue');
 	            log(' Fin del juego Aciertos: ');
 	  					
 	  					resolve();
+
 	  					return;
 	  				}
 
-	  				let pos = Math.floor(Math.random()*restantes.length);
-	  				let quiz = restantes[pos];
-	  		    restantes.splice(pos, 1); 
+	  				let indice = Math.floor(Math.random()*restantes.length);
+	  				let quiz = restantes[indice];
+	  		    restantes.splice(indice, 1); 
 	
 	  		    makeQuestion(rl, quiz.question)
 	  		    .then(answer => {
@@ -137,7 +139,7 @@ exports.testCmd = (rl,id) => {
 	  				    resolve(playOne());
 	            }else{
 	              biglog('INCORRECTO', 'red');
-	              log(` Fin del juego. Aciertos: ${score} `);
+	              log(` Fin del juego, Aciertos: ${score} `);
 	  				   
 	  				    resolve();
 	  			    }
@@ -157,8 +159,8 @@ exports.testCmd = (rl,id) => {
 
 	  		})
 	  		.then(() => {
+
 	  			biglog(score, 'green');
-	  			
 	  			rl.prompt();
 	  		})
 	}
