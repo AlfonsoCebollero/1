@@ -57,7 +57,7 @@ rl.on('line', (line) => {
 
 
 	case 'show':
-		cmds.showCmd(rl);
+		cmds.showCmd(rl,args[1]);
 		break;
 
 

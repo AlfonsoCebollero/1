@@ -99,7 +99,7 @@ exports.testCmd = (rl,id) => {
 	    rl.prompt();
 	  });
 	
-	}
+};
 	
 	
 	/*
@@ -153,6 +153,7 @@ exports.testCmd = (rl,id) => {
 	  		.then(() => {
 
 	  		 	return playOne(); 
+	  		 })
 	  		.catch(e => {
 	  			errorlog("Error:" + e);
 
@@ -162,7 +163,7 @@ exports.testCmd = (rl,id) => {
 	  			biglog(score, 'green');
 	  			rl.prompt();
 	  		})
-	}
+	};
 
 const makeQuestion = (rl,text) => {
 
@@ -222,7 +223,7 @@ exports.editCmd = (rl,id) => {
 
 		process.stdout.isTTY && setTimeout(() => {rl.write(quiz.question)},0);
 		return makeQuestion(rl, 'Introduzca la pregunta: ')
-		.then( g => {
+		.then( q => {
 			process.stdout.isTTY && setTimeout(() => {rl.write(quiz.answer)},0);
 			return makeQuestion(rl, 'Introduzca la respuesta')
 			.then(a => {
