@@ -138,7 +138,7 @@ exports.testCmd = (rl,id) => {
 	  				    log(` CORRECTO - Lleva ${score} aciertos`);
 	  				    resolve(playOne());
 	            }else{
-	              biglog('INCORRECTO', 'red');
+	              		log('INCORRECTO', 'red');
 	              log(` Fin del juego, Aciertos: ${score} `);
 	  				   
 	  				    resolve();
